@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Anchor app icon</title>
+  <desc id="desc">A dark rounded square with a calm green anchor mark.</desc>
+  <rect width="512" height="512" rx="112" fill="#1b2422"/>
+  <circle cx="256" cy="256" r="170" fill="#1c7c66"/>
+  <circle cx="256" cy="256" r="118" fill="#f5f3ee"/>
+  <path fill="#1b2422" d="M256 112c18 0 32 14 32 32 0 12-6 22-16 28v133h72c-8 54-44 86-88 86s-80-32-88-86h72V172c-10-6-16-16-16-28 0-18 14-32 32-32Zm0 24c-5 0-8 3-8 8s3 8 8 8 8-3 8-8-3-8-8-8Zm-42 192c11 23 27 35 42 35s31-12 42-35h-84Z"/>
+</svg>

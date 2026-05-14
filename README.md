@@ -6,6 +6,12 @@ Anchor is a daily stability operating system. This first prototype is intentiona
 
 Open `index.html` in a browser.
 
+When GitHub Pages is enabled, open:
+
+`https://aspurand.github.io/anchor/`
+
+On mobile, use the browser share menu to add Anchor to your home screen as a PWA.
+
 ## Built In This Pass
 
 - Daily Anchor Score from sleep, movement, meals, outdoors, social contact, creative time, screen loop, and mood check-in.
@@ -17,6 +23,7 @@ Open `index.html` in a browser.
 - Personal project reminder.
 - Evening review.
 - Local browser storage only. No account, backend, analytics, or cloud AI.
+- PWA manifest, icons, and service worker for home-screen install and offline loading.
 
 ## Next Build Step
 

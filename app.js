@@ -630,3 +630,11 @@ function capitalize(value) {
 
 bindEvents();
 render();
+
+if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      // The app still works without offline install support.
+    });
+  });
+}
