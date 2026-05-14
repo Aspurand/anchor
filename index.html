@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anchor Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Anchor navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">A</div>
+          <div>
+            <h1>Anchor</h1>
+            <p>Daily stability OS</p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Primary">
+          <button class="nav-button active" data-view="home" type="button">Home</button>
+          <button class="nav-button" data-view="spiral" type="button">Reset</button>
+          <button class="nav-button" data-view="relationship" type="button">Relationship</button>
+          <button class="nav-button" data-view="evening" type="button">Evening</button>
+        </nav>
+
+        <section class="safety-note" aria-label="Safety note">
+          <strong>Not therapy.</strong>
+          <span>Use crisis or emergency support if you may hurt yourself or someone else.</span>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <section class="topbar" aria-label="Today summary">
+          <div>
+            <p class="eyebrow" id="todayLabel">Today</p>
+            <h2 id="viewTitle">Anchor Status</h2>
+          </div>
+          <button class="quiet-button" id="resetDayButton" type="button">Clear today</button>
+        </section>
+
+        <section class="view active" id="homeView" aria-labelledby="homeHeading">
+          <div class="score-layout">
+            <section class="score-panel">
+              <div class="score-ring" aria-label="Anchor score">
+                <svg viewBox="0 0 140 140" role="img" aria-labelledby="scoreTitle">
+                  <title id="scoreTitle">Anchor score</title>
+                  <circle class="ring-bg" cx="70" cy="70" r="56"></circle>
+                  <circle class="ring-value" id="scoreRing" cx="70" cy="70" r="56"></circle>
+                </svg>
+                <div class="score-number">
+                  <strong id="anchorScore">0</strong>
+                  <span>/100</span>
+                </div>
+              </div>
+              <div class="score-copy">
+                <p class="eyebrow">Today's Anchor Score</p>
+                <h3 id="scoreMessage">Today needs grounding, not analysis.</h3>
+                <p id="riskFactor">Log a few anchors to find the biggest risk factor.</p>
+              </div>
+            </section>
+
+            <section class="next-action-panel">
+              <p class="eyebrow">Next Best Action</p>
+              <h3 id="nextAction">Drink water, eat something small, then take a 10-minute walk.</h3>
+              <div class="action-row">
+                <button class="primary-button" data-view-target="spiral" type="button">I'm spiraling</button>
+                <button class="secondary-button" id="doneActionButton" type="button">Done</button>
+              </div>
+            </section>
+          </div>
+
+          <section class="widget-preview" aria-label="Widget preview">
+            <div class="phone-frame">
+              <div class="widget-card small-widget">
+                <div>
+                  <p>Anchor</p>
+                  <strong><span id="widgetScore">0</span>/100</strong>
+                </div>
+                <span id="widgetAction">10-min walk + water</span>
+              </div>
+              <div class="widget-card medium-widget">
+                <div class="widget-header">
+                  <span>Anchor Status</span>
+                  <strong id="widgetStatus">Low</strong>
+                </div>
+                <div class="status-grid" id="widgetStatusGrid"></div>
+                <button data-view-target="spiral" type="button">Reset me</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="control-grid">
+            <section class="panel" aria-labelledby="checkinHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Check-In</p>
+                  <h3 id="checkinHeading">Mood and anxiety</h3>
+                </div>
+                <span id="checkinState">Not logged</span>
+              </div>
+              <div class="choice-grid" id="moodButtons"></div>
+              <label class="range-field">
+                <span>Intensity</span>
+                <input id="intensityInput" type="range" min="1" max="10" value="5" />
+                <strong id="intensityValue">5</strong>
+              </label>
+              <select id="reasonSelect" aria-label="Reason">
+                <option value="unknown">Unknown</option>
+                <option value="girlfriend">Girlfriend</option>
+                <option value="work">Work</option>
+                <option value="money">Money</option>
+                <option value="loneliness">Loneliness</option>
+                <option value="family">Family</option>
+                <option value="body/health">Body / health</option>
+                <option value="future">Future</option>
+              </select>
+              <button class="primary-button full-width" id="logMoodButton" type="button">Log mood</button>
+              <p class="coach-output" id="moodOutput">Every check-in returns you to action before analysis.</p>
+            </section>
+
+            <section class="panel" aria-labelledby="anchorsHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Body</p>
+                  <h3 id="anchorsHeading">Daily anchors</h3>
+                </div>
+                <span>Manual V1</span>
+              </div>
+              <div class="metric-list" id="metricList"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="missionsHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Real Life Missions</p>
+                  <h3 id="missionsHeading">Action over analysis</h3>
+                </div>
+                <button class="quiet-button" id="newMissionButton" type="button">New</button>
+              </div>
+              <div class="mission-box">
+                <strong id="missionTitle">12-minute walk, no phone</strong>
+                <span id="missionReason">For anxious energy and rumination.</span>
+              </div>
+              <button class="secondary-button full-width" id="missionDoneButton" type="button">Mission done</button>
+            </section>
+
+            <section class="panel" aria-labelledby="projectHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Life</p>
+                  <h3 id="projectHeading">Personal project</h3>
+                </div>
+                <span id="projectGap">0 days</span>
+              </div>
+              <input id="projectNameInput" type="text" maxlength="48" placeholder="AI assistant build" />
+              <label class="range-field">
+                <span>Creative minutes</span>
+                <input id="creativeInput" type="range" min="0" max="120" step="5" value="0" />
+                <strong id="creativeValue">0</strong>
+              </label>
+              <button class="secondary-button full-width" id="saveProjectButton" type="button">Save project anchor</button>
+              <p class="coach-output" id="projectOutput">Your life needs forward motion outside the relationship.</p>
+            </section>
+          </section>
+        </section>
+
+        <section class="view" id="spiralView" aria-labelledby="spiralHeading">
+          <div class="flow-layout">
+            <section class="flow-panel">
+              <p class="eyebrow">Guided Reset</p>
+              <h3 id="spiralHeading">I'm spiraling</h3>
+              <div class="stepper" id="spiralStepper"></div>
+
+              <div class="flow-step active" data-step="0">
+                <label>
+                  What is the fear?
+                  <textarea id="fearInput" rows="4" placeholder="She went out and I feel like something bad will happen."></textarea>
+                </label>
+                <button class="primary-button" data-next-step type="button">Name it</button>
+              </div>
+
+              <div class="flow-step" data-step="1">
+                <label>
+                  Fact
+                  <textarea id="factInput" rows="3" placeholder="She went out."></textarea>
+                </label>
+                <label>
+                  Story
+                  <textarea id="storyInput" rows="3" placeholder="She may forget me, betray me, or hide something."></textarea>
+                </label>
+                <button class="primary-button" data-next-step type="button">Separate it</button>
+              </div>
+
+              <div class="flow-step" data-step="2">
+                <p class="field-label">Choose one body reset</p>
+                <div class="choice-grid" id="bodyResetChoices"></div>
+                <button class="primary-button" data-next-step type="button">Start delay</button>
+              </div>
+
+              <div class="flow-step" data-step="3">
+                <div class="timer-box">
+                  <p>Do not text for reassurance yet.</p>
+                  <strong id="timerDisplay">20:00</strong>
+                  <span>Regulate first, then decide.</span>
+                </div>
+                <div class="action-row">
+                  <button class="secondary-button" id="startTimerButton" type="button">Start timer</button>
+                  <button class="primary-button" data-next-step type="button">Recheck now</button>
+                </div>
+              </div>
+
+              <div class="flow-step" data-step="4">
+                <p class="field-label">After reset, anxiety is...</p>
+                <div class="choice-grid">
+                  <button class="choice-button" data-recheck="lower" type="button">Lower</button>
+                  <button class="choice-button" data-recheck="same" type="button">Same</button>
+                  <button class="choice-button" data-recheck="worse" type="button">Worse</button>
+                </div>
+                <p class="coach-output strong" id="recheckOutput">Choose the current state.</p>
+                <button class="secondary-button full-width" id="saveSpiralButton" type="button">Save reset log</button>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="resetLogHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Recent</p>
+                  <h3 id="resetLogHeading">Spiral logs</h3>
+                </div>
+                <span id="resetCount">0</span>
+              </div>
+              <div class="log-list" id="spiralLogList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="relationshipView" aria-labelledby="relationshipHeading">
+          <div class="relationship-grid">
+            <section class="panel">
+              <p class="eyebrow">Private Module</p>
+              <h3 id="relationshipHeading">Relationship anxiety</h3>
+              <label>
+                Trigger
+                <select id="relationshipTrigger">
+                  <option value="she went out">She went out</option>
+                  <option value="slow reply">Slow reply</option>
+                  <option value="different tone">Different tone</option>
+                  <option value="less affection">Less affection</option>
+                  <option value="social media">Social media</option>
+                  <option value="past memory">Past memory</option>
+                  <option value="uncertainty about future">Uncertainty about future</option>
+                  <option value="missing physical presence">Missing physical presence</option>
+                </select>
+              </label>
+              <label class="range-field">
+                <span>Intensity</span>
+                <input id="relationshipIntensity" type="range" min="1" max="10" value="6" />
+                <strong id="relationshipIntensityValue">6</strong>
+              </label>
+              <div class="toggle-row">
+                <label><input id="reassuranceSought" type="checkbox" /> Asked for reassurance</label>
+                <label><input id="reassuranceHelped" type="checkbox" /> It helped</label>
+              </div>
+              <label>
+                Relief duration
+                <select id="reliefDuration">
+                  <option value="none">None</option>
+                  <option value="under 20 min">Under 20 min</option>
+                  <option value="40 min">About 40 min</option>
+                  <option value="few hours">A few hours</option>
+                  <option value="all day">All day</option>
+                </select>
+              </label>
+              <textarea id="relationshipNotes" rows="4" placeholder="What happened? Keep it factual."></textarea>
+              <button class="primary-button full-width" id="saveRelationshipButton" type="button">Log trigger</button>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Pattern Detector</p>
+                  <h3>State before story</h3>
+                </div>
+                <span id="relationshipLogCount">0 logs</span>
+              </div>
+              <p class="coach-output strong" id="relationshipPattern">Log triggers to reveal whether anxiety spikes with low sleep, low movement, high screen time, or isolation.</p>
+              <div class="log-list" id="relationshipLogList"></div>
+            </section>
+
+            <section class="panel wide-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Conversation Builder</p>
+                  <h3>Secure language</h3>
+                </div>
+                <button class="quiet-button" id="buildMessageButton" type="button">Build</button>
+              </div>
+              <textarea id="rawMessageInput" rows="3" placeholder="Why are you always out? Do you even care?"></textarea>
+              <p class="coach-output strong" id="reframedMessage">I am feeling disconnected today. Can we spend some intentional time later? I do not want to control your plans; I want to rebuild closeness.</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="eveningView" aria-labelledby="eveningHeading">
+          <div class="evening-layout">
+            <section class="panel">
+              <p class="eyebrow">Evening Review</p>
+              <h3 id="eveningHeading">Close the day cleanly</h3>
+              <label>
+                What helped today?
+                <textarea id="helpedInput" rows="3"></textarea>
+              </label>
+              <label>
+                What made you spiral?
+                <textarea id="spiralCauseInput" rows="3"></textarea>
+              </label>
+              <label>
+                Tomorrow's one anchor
+                <input id="tomorrowAnchorInput" type="text" maxlength="80" placeholder="Breakfast + run before work" />
+              </label>
+              <button class="primary-button full-width" id="saveEveningButton" type="button">Save review</button>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Output</p>
+                  <h3>Tomorrow's best move</h3>
+                </div>
+                <span id="eveningSavedState">Draft</span>
+              </div>
+              <p class="coach-output strong" id="eveningOutput">Today was low-social, high-screen, low-food. Tomorrow's best move: breakfast + run before work.</p>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

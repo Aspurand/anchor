@@ -1,0 +1,6 @@
+chrome-profile/
+edge-profile/
+Reps/
+*.log
+.DS_Store
+Thumbs.db
