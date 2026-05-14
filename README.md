@@ -14,12 +14,13 @@ On mobile, use the browser share menu to add Anchor to your home screen as a PWA
 
 ## Built In This Pass
 
-- Daily Anchor Score from sleep, movement, meals, outdoors, social contact, creative time, screen loop, and mood check-in.
+- Daily Anchor Score from sleep, movement, meals, outdoors, social contact, creative time, passive screen time, and mood check-in.
 - Home-screen widget mockup with score, status, and next action.
 - Mood check-in that routes back to body regulation before analysis.
 - "I'm spiraling" reset flow: fear, fact vs story, body reset, no-text delay, recheck, log.
 - Relationship anxiety trigger log, reassurance tracking, pattern summary, and message reframer.
 - Real Life Missions.
+- Free local coach insight that explains recent patterns without an AI API.
 - Personal project reminder.
 - Evening review.
 - Local browser storage only. No account, backend, analytics, or cloud AI.

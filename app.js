@@ -2,13 +2,25 @@ const storageKey = "anchor.prototype.v1";
 const todayKey = new Date().toISOString().slice(0, 10);
 
 const metrics = [
-  { key: "sleepHours", label: "Sleep", unit: "h", max: 8, scoreMax: 20, good: 7, okay: 6 },
-  { key: "movementMinutes", label: "Movement", unit: "m", max: 45, scoreMax: 20, good: 30, okay: 15 },
-  { key: "mealsCount", label: "Meals", unit: "", max: 3, scoreMax: 15, good: 2, okay: 1 },
-  { key: "outdoorMinutes", label: "Outdoors", unit: "m", max: 30, scoreMax: 10, good: 15, okay: 5 },
-  { key: "socialMinutes", label: "Social", unit: "m", max: 45, scoreMax: 10, good: 20, okay: 5 },
-  { key: "creativeMinutes", label: "Build time", unit: "m", max: 60, scoreMax: 10, good: 30, okay: 10 },
-  { key: "screenHours", label: "Screen loop", unit: "h", max: 6, scoreMax: 10, reverse: true, good: 2, okay: 4 },
+  { key: "sleepHours", label: "Sleep", unit: "h", max: 12, step: 0.5, target: 8, scoreMax: 20, good: 7, okay: 6 },
+  { key: "movementMinutes", label: "Movement", unit: "m", max: 180, step: 5, target: 30, scoreMax: 20, good: 30, okay: 15 },
+  { key: "mealsCount", label: "Meals", unit: "", max: 6, step: 1, target: 3, scoreMax: 15, good: 2, okay: 1 },
+  { key: "outdoorMinutes", label: "Outdoors", unit: "m", max: 180, step: 5, target: 30, scoreMax: 10, good: 15, okay: 5 },
+  { key: "socialMinutes", label: "Social", unit: "m", max: 240, step: 5, target: 45, scoreMax: 10, good: 20, okay: 5 },
+  { key: "creativeMinutes", label: "Build time", unit: "m", max: 240, step: 5, target: 60, scoreMax: 10, good: 30, okay: 10 },
+  {
+    key: "screenHours",
+    label: "Passive screen time",
+    unit: "h",
+    max: 16,
+    step: 0.5,
+    target: 8,
+    scoreMax: 10,
+    reverse: true,
+    good: 2,
+    okay: 4,
+    help: "Only count escape-mode scrolling, YouTube, Netflix, gaming without enjoyment, or waiting for replies. Do not count work or intentional building time.",
+  },
 ];
 
 const moods = ["calm", "okay", "anxious", "sad", "angry", "numb", "lonely", "overwhelmed"];
@@ -98,11 +110,12 @@ function formatDateLabel() {
 
 function scoreMetric(metric) {
   const value = Number(state.daily[metric.key] || 0);
+  const target = metric.target || metric.max;
   if (metric.reverse) {
-    const ratio = clamp(1 - value / metric.max, 0, 1);
+    const ratio = clamp(1 - value / target, 0, 1);
     return Math.round(ratio * metric.scoreMax);
   }
-  const ratio = clamp(value / metric.max, 0, 1);
+  const ratio = clamp(value / target, 0, 1);
   return Math.round(ratio * metric.scoreMax);
 }
 
@@ -234,33 +247,85 @@ function renderMetrics() {
 
   metrics.forEach((metric) => {
     const value = Number(state.daily[metric.key] || 0);
+    const target = metric.target || metric.max;
     const percent = metric.reverse
-      ? clamp((1 - value / metric.max) * 100, 0, 100)
-      : clamp((value / metric.max) * 100, 0, 100);
+      ? clamp((1 - value / target) * 100, 0, 100)
+      : clamp((value / target) * 100, 0, 100);
     const valueLabel = metric.unit ? `${value}${metric.unit}` : `${value}`;
+    const sliderMax = Math.max(metric.max, value + metric.step);
 
     const row = document.createElement("div");
     row.className = "metric";
+    row.dataset.metricRow = metric.key;
     row.innerHTML = `
       <div class="metric-top">
         <span>${metric.label}</span>
-        <strong>${valueLabel} - ${metricStatus(metric)}</strong>
+        <strong data-metric-label="${metric.key}">${valueLabel} - ${metricStatus(metric)}</strong>
       </div>
-      <div class="metric-track"><div class="metric-fill" style="width: ${percent}%"></div></div>
+      <div class="metric-track"><div class="metric-fill" data-metric-fill="${metric.key}" style="width: ${percent}%"></div></div>
       <div class="metric-controls">
         <button type="button" data-metric-minus="${metric.key}">-</button>
-        <input aria-label="${metric.label}" type="range" min="0" max="${metric.max}" step="${metric.key === "screenHours" || metric.key === "sleepHours" ? "0.5" : "1"}" value="${value}" data-metric="${metric.key}" />
+        <input aria-label="${metric.label}" type="range" min="0" max="${sliderMax}" step="${metric.step}" value="${value}" data-metric="${metric.key}" />
+        <input aria-label="${metric.label} number" type="number" min="0" step="${metric.step}" value="${value}" data-metric-number="${metric.key}" />
         <button type="button" data-metric-plus="${metric.key}">+</button>
       </div>
+      ${metric.help ? `<p class="metric-help">${metric.help}</p>` : ""}
     `;
     metricList.append(row);
   });
+}
+
+function updateMetricValue(key, value) {
+  const metric = metrics.find((item) => item.key === key);
+  const cleanValue = Math.max(0, Number.isFinite(value) ? value : 0);
+  state.daily[key] = cleanValue;
+  saveState();
+  updateMetricRow(metric);
+  renderScore();
+  if (key === "creativeMinutes") renderProject();
+}
+
+function updateMetricRow(metric) {
+  const value = Number(state.daily[metric.key] || 0);
+  const target = metric.target || metric.max;
+  const percent = metric.reverse
+    ? clamp((1 - value / target) * 100, 0, 100)
+    : clamp((value / target) * 100, 0, 100);
+  const valueLabel = metric.unit ? `${value}${metric.unit}` : `${value}`;
+  const label = document.querySelector(`[data-metric-label="${metric.key}"]`);
+  const fill = document.querySelector(`[data-metric-fill="${metric.key}"]`);
+  const range = document.querySelector(`[data-metric="${metric.key}"]`);
+  const number = document.querySelector(`[data-metric-number="${metric.key}"]`);
+
+  if (label) label.textContent = `${valueLabel} - ${metricStatus(metric)}`;
+  if (fill) fill.style.width = `${percent}%`;
+  if (range) {
+    range.max = Math.max(metric.max, value + metric.step);
+    range.value = value;
+  }
+  if (number) number.value = value;
 }
 
 function renderMission() {
   const mission = missions[state.currentMission % missions.length];
   document.querySelector("#missionTitle").textContent = mission.title;
   document.querySelector("#missionReason").textContent = mission.reason;
+}
+
+function localCoachInsight() {
+  const score = anchorScore();
+  const risk = biggestRisk();
+  const mood = state.mood || state.selectedMood;
+  const anxiousTrigger = state.relationshipLogs.at(-1)?.trigger;
+  const base = score < 50
+    ? "This looks like low stability, not a night for major conclusions."
+    : "You have enough stability to act calmly, but keep the next step small.";
+
+  const relationshipLine = anxiousTrigger
+    ? `Your latest relationship trigger was "${anxiousTrigger}", so regulate before texting.`
+    : "If this is relationship anxiety, regulate before you interpret it.";
+
+  return `${base} Main pressure point: ${risk.metric.label.toLowerCase()} is ${risk.status}. Mood: ${mood}. ${relationshipLine} Do this now: ${nextAction()}`;
 }
 
 function renderProject() {
@@ -351,7 +416,7 @@ function renderRelationship() {
 
 function relationshipPattern() {
   if (state.relationshipLogs.length < 3) {
-    return "Log at least 3 triggers to begin pattern detection. The app will compare triggers against sleep, movement, screen time, and social contact.";
+    return "Log at least 3 triggers to begin pattern detection. The app will compare triggers against sleep, movement, passive screen time, and social contact.";
   }
 
   const commonTrigger = mode(state.relationshipLogs.map((log) => log.trigger));
@@ -407,10 +472,9 @@ function bindEvents() {
   });
 
   document.querySelector("#metricList").addEventListener("input", (event) => {
-    if (!event.target.matches("[data-metric]")) return;
-    state.daily[event.target.dataset.metric] = Number(event.target.value);
-    saveState();
-    render();
+    const key = event.target.dataset.metric || event.target.dataset.metricNumber;
+    if (!key) return;
+    updateMetricValue(key, Number(event.target.value));
   });
 
   document.querySelector("#metricList").addEventListener("click", (event) => {
@@ -419,11 +483,9 @@ function bindEvents() {
     const key = minus || plus;
     if (!key) return;
     const metric = metrics.find((item) => item.key === key);
-    const step = key === "screenHours" || key === "sleepHours" ? 0.5 : 1;
+    const step = metric.step;
     const direction = plus ? 1 : -1;
-    state.daily[key] = clamp(Number(state.daily[key] || 0) + step * direction, 0, metric.max);
-    saveState();
-    render();
+    updateMetricValue(key, Number(state.daily[key] || 0) + step * direction);
   });
 
   document.querySelector("#newMissionButton").addEventListener("click", () => {
@@ -439,6 +501,10 @@ function bindEvents() {
     if (mission.title.includes("project")) state.daily.creativeMinutes = Math.max(state.daily.creativeMinutes, 20);
     saveState();
     render();
+  });
+
+  document.querySelector("#localCoachButton").addEventListener("click", () => {
+    document.querySelector("#localCoachOutput").textContent = localCoachInsight();
   });
 
   document.querySelector("#creativeInput").addEventListener("input", (event) => {
