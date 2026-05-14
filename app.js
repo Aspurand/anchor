@@ -57,6 +57,7 @@ const defaultState = {
   currentMission: 0,
   spiralStep: 0,
   selectedReset: "10-min walk",
+  timerEndsAt: null,
   recheck: null,
   spiralLogs: [],
   relationshipLogs: [],
@@ -359,6 +360,11 @@ function renderSpiral() {
     step.classList.toggle("active", Number(step.dataset.step) === state.spiralStep);
   });
 
+  syncTimerFromClock();
+  if (state.spiralStep === 3 && state.timerEndsAt) {
+    ensureTimerInterval();
+  }
+
   const choices = document.querySelector("#bodyResetChoices");
   choices.innerHTML = "";
   resets.forEach((reset) => {
@@ -524,6 +530,11 @@ function bindEvents() {
   document.querySelectorAll("[data-next-step]").forEach((button) => {
     button.addEventListener("click", () => {
       state.spiralStep = clamp(state.spiralStep + 1, 0, 4);
+      if (state.spiralStep === 4) {
+        state.timerEndsAt = null;
+        clearInterval(timerId);
+        timerId = null;
+      }
       saveState();
       renderSpiral();
     });
@@ -579,19 +590,37 @@ function setView(viewName) {
 
 function startTimer() {
   clearInterval(timerId);
-  timerRemaining = 20 * 60;
-  updateTimerDisplay();
-  timerId = setInterval(() => {
-    timerRemaining -= 1;
+  state.timerEndsAt = new Date(Date.now() + 20 * 60 * 1000).toISOString();
+  state.spiralStep = 3;
+  saveState();
+  syncTimerFromClock();
+  ensureTimerInterval();
+}
+
+function ensureTimerInterval() {
+  if (timerId) return;
+  timerId = setInterval(syncTimerFromClock, 1000);
+}
+
+function syncTimerFromClock() {
+  if (!state.timerEndsAt) {
+    timerRemaining = 20 * 60;
     updateTimerDisplay();
-    if (timerRemaining <= 0) {
-      clearInterval(timerId);
-      timerId = null;
-      state.spiralStep = 4;
-      saveState();
-      renderSpiral();
-    }
-  }, 1000);
+    return;
+  }
+
+  const endsAt = new Date(state.timerEndsAt).getTime();
+  timerRemaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+  updateTimerDisplay();
+
+  if (timerRemaining > 0) return;
+
+  clearInterval(timerId);
+  timerId = null;
+  state.timerEndsAt = null;
+  state.spiralStep = 4;
+  saveState();
+  renderSpiral();
 }
 
 function updateTimerDisplay() {
@@ -612,6 +641,9 @@ function saveSpiralLog() {
   state.spiralLogs.push(log);
   state.spiralStep = 0;
   state.recheck = null;
+  state.timerEndsAt = null;
+  clearInterval(timerId);
+  timerId = null;
   saveState();
   document.querySelector("#fearInput").value = "";
   document.querySelector("#factInput").value = "";
@@ -696,6 +728,11 @@ function capitalize(value) {
 
 bindEvents();
 render();
+
+window.addEventListener("focus", syncTimerFromClock);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) syncTimerFromClock();
+});
 
 if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
   window.addEventListener("load", () => {

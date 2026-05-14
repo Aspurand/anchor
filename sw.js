@@ -1,4 +1,4 @@
-const cacheName = "anchor-pwa-v2";
+const cacheName = "anchor-pwa-v3";
 const appShell = [
   "./",
   "./index.html",
